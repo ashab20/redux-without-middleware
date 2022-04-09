@@ -1,73 +1,168 @@
-# Getting Started with Create React App
+# *** REDUX WITHOUT MIDDLEWARE IN REACT***
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+run the application
+> yarn start
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+`src/components/basicRedux.js` has the basic understanding of redux. and `src/redux` the folder where i have set redux with redux store and action in syncronize way and connected into the project with help of react-redux.
+`src/redux/Store.js`
 
-### `npm start`
+`store.js`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```javascript
+import { createStore } from 'redux';
+import mainReducer from './reducer';
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+const store = createStore(mainReducer,{},  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  );
 
-### `npm test`
+export default store;
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+connect redux store in react with help of react-redux
 
-### `npm run build`
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { Provider} from 'react-redux'
+import store from './redux/Store';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+root.render(
+  <Provider store={store}>
+    <App/>
+  </Provider>
+);
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`reducer/index.js`
 
-### `npm run eject`
+```javascript
+import { combineReducers } from 'redux';
+import { productReducer,selectedProductReducer }from './productReducer';
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+const mainReducer = combineReducers({
+    allProduct: productReducer,
+    product:selectedProductReducer
+});
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export default mainReducer;
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+`contents/actioTypes.js`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```javascript
+export const actionsTypes = {
+    SET_PRODUCT: 'SET_PRODUCT',
+    SELECT_PRODUCT: 'SELECT_PRODUCT',
+    REMOVED_PRODUCT: 'REMOVED_PRODUCT',
+}
+```
 
-## Learn More
+`actions/productActions.js`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```javascript
+import {actionsTypes} from '../contents/actionTypes';
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+export const setProducts = (products) => {
+    return {
+        type:actionsTypes.SET_PRODUCT,
+        payload:products,
+    }
+}
 
-### Code Splitting
+export const selectProducts = (product) => {
+    return {
+        type: actionsTypes.SELECT_PRODUCT,
+        payload:product
+    }
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+export const RemovedSelectProducts = () => {
+    return {
+        type: actionsTypes.REMOVED_PRODUCT
+    }
+}
+```
 
-### Analyzing the Bundle Size
+_fetching data with axios from a [fakestoreapi](https://fakestoreapi.com/products "fakestoreapi") _
+```javascript
+import React,{useEffect} from 'react'
+import { useDispatch } from 'react-redux';
+import axios from 'axios'
+import { setProducts } from '../../redux/actions/productAction';
+import Product from './Product';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+const Products = () => {
+  const dispatch = useDispatch();
 
-### Making a Progressive Web App
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchProduct = async() => {
+    const res = await axios.get('https://fakestoreapi.com/products').catch((err) => { console.log({Error: err})});
+    dispatch(setProducts(res.data));
+  }
+  useEffect(() => {
+    fetchProduct()
+  },[fetchProduct]);
+  return (
+    <div className='grid container'>
+      <Product/>
+    </div>
+  )
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+export default Products;
+```
 
-### Advanced Configuration
+_design the front end part_
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```javascript
+import React from 'react'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
-### Deployment
+const Product = () => {
+  const products = useSelector((state) => state.allProduct.products);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+  const rednderProduct = products.map((p) => {
+    const {id, title,price,category,image,rating } = p;
+    return (
+      
+      <div key={id} className="product">
+        <Link to={`/product/${id}`}>
+        <img src={image} alt="Product" width="100%" height="400px"/>
+        <h3 className='title'>{title}</h3>
+        <h4>Categories :{category}</h4>
+        <p className='price'> <span>Price: {price}$ </span>  <span>Rates: {rating.rate}</span> </p>
+        </Link>
+    </div>
+    )
+  })
 
-### `npm run build` fails to minify
+  return (<>{rednderProduct}</>
+  )
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# redux-without-middleware
-# redux-without-middleware
-# redux-without-middleware
+export default Product
+```
+
+
+---
+## OUTPUT
+_image1_
+
+!["Fetching Product"](README%20IMAGE/readme-productpages.png)
+
+_image 2_
+!["Fetching Product"](README%20IMAGE/reame-singlePages.png)
+
+
+
+
+
+

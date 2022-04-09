@@ -1,5 +1,5 @@
 {
-  "name": "redux-practices",
+  "name": "redux-without-middleware",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
