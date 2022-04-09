@@ -1,41 +1,23 @@
-import { createStore } from 'redux'
+import Products from "./components/products/Products";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import './app.css'
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import ProductPage from "./components/ProductPage";
 
 function App() {
-  
-  const reducer = (state={},action) => {
-    if(action.type === 'A'){
-      return {
-        ...state,
-        A:'i am A'}
-    }else if (action.type === 'B'){
-      return {
-        ...state,
-        B:'I am not A'};
-    }
-    return {...state};
-  }
-  const store  = createStore(reducer)
-
-  store.subscribe(() => {
-    console.log(store.getState().A);
-  })
-  
-  store.subscribe(() => {
-    console.log(store.getState().B);
-  })
-
-
-  store.dispatch({type:'B'});
-  store.dispatch({type:'any'});
-  store.dispatch({type:'A'});
-  store.dispatch({type:'any'});
-  store.dispatch({type:'B'});
-  store.dispatch({type:'A'});
-
-  console.log(' directy console: '+store.getState());
+ 
   return (
     <div>
-    </div>
+    <Router>
+     <Navbar/>
+    <Routes>
+        <Route path="/" element={<Products/>} />
+        <Route path="/product/:productId" element={<ProductPage/>} />
+      </Routes> 
+      <Footer/>
+  </Router> 
+    </div> 
   );
 }
 
