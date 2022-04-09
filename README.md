@@ -1,8 +1,9 @@
 # *** REDUX WITHOUT MIDDLEWARE IN REACT***
 
 run the application
-> yarn start
-
+```bash
+yarn start
+```
 ---
 
 `src/components/basicRedux.js` has the basic understanding of redux. and `src/redux` the folder where i have set redux with redux store and action in syncronize way and connected into the project with help of react-redux.
